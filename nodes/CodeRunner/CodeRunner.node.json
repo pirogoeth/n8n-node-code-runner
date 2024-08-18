@@ -1,0 +1,12 @@
+{
+    "node": "n8n-nodes-code-runner.CodeRunner",
+    "nodeVersion": "1.0",
+    "codexVersion": "1.0",
+    "categories": ["Development", "Miscellaneous"],
+    "subcategories": {
+        "Miscellaneous": ["Helpers", "Data Transformation"]
+    },
+    "resources": {
+        "primaryDocumentation": [{"url": ""}]
+    }
+}
