@@ -21,6 +21,13 @@ export class CodeRunner implements INodeType {
     },
     inputs: ['main'],
     outputs: ['main'],
+    credentials: [
+      {
+        name: 'codeRunnerEnv',
+        displayName: 'Environment Variables to use',
+        required: false,
+      },
+    ],
     parameterPane: 'wide',
     properties: [
       {
@@ -68,9 +75,15 @@ export class CodeRunner implements INodeType {
         default: '',
         description: 'The code to run',
         noDataExpression: true,
-      }
+      },
     ],
   };
+
+  debugLogToWindow(that: IExecuteFunctions, ...args: any[]): void {
+    if (that.getMode() == 'manual') {
+      console.log(`[Workflow ${that.getWorkflow().id}][Node ${that.getNode().name}]`, ...args);
+    }
+  }
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const runtimeType = this.getNodeParameter('runtime', 0) as string;
@@ -89,6 +102,11 @@ export class CodeRunner implements INodeType {
         throw new Error(`Unsupported runtime: ${runtime}`);
     }
 
-    return await runtime.execute(this, codeType, code, this.getInputData());
+    const inputs = this.getInputData();
+    // self.debugLogToWindow(this, 'Input items:', inputs);
+    const result = await runtime.execute(this, codeType, code, inputs);
+    // self.debugLogToWindow(this, 'Output items:', result);
+
+    return result;
   }
 }

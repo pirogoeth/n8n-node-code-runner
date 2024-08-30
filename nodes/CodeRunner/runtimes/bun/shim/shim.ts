@@ -9,9 +9,19 @@ const RESULT_FD = 3;
 
 // Writes a result object to the result output fd and exits cleanly
 async function $result(items: INodeExecutionData|INodeExecutionData[]) {
-	if (!Array.isArray(items)) {
-		items = [items];
-	}
+  if (!Array.isArray(items)) {
+    items = [items];
+  }
+
+  for (const item of items) {
+    if (item.binary !== undefined) {
+      for (const [_, binData] of Object.entries(item.binary)) {
+        if (binData !== undefined) {
+          binData.data = Buffer.from(binData.data).toString('base64');
+        }
+      }
+    }
+  }
 
   fs.write(RESULT_FD, JSON.stringify(items)+'\n', (err, written, str) => {
     if (err) {
@@ -50,8 +60,8 @@ async function shimMain() {
       globalThis.$items = items;
       //@ts-expect-error(7017)
       globalThis.$result = $result;
-			//@ts-expect-error(7017)
-			globalThis.$abortWithError = $abortWithError;
+      //@ts-expect-error(7017)
+      globalThis.$abortWithError = $abortWithError;
 
       console.debug('shim initialized - launching user code');
     }).then(async () => {
@@ -59,7 +69,7 @@ async function shimMain() {
         await import(`${codeDir}/code`);
       } catch (err) {
         console.error(`Error running code: ${err}`);
-				$abortWithError(err);
+        $abortWithError(err);
       };
     });
 }
@@ -68,5 +78,5 @@ try {
   shimMain();
 } catch (err) {
   console.error(`Error in shim: ${err}`);
-	$abortWithError(err);
+  $abortWithError(err);
 }

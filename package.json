@@ -37,6 +37,9 @@
     "n8nNodesApiVersion": 1,
     "nodes": [
       "dist/nodes/CodeRunner/CodeRunner.node.js"
+    ],
+    "credentials": [
+      "dist/credentials/CodeRunner/CodeRunner.credentials.js"
     ]
   },
   "devDependencies": {

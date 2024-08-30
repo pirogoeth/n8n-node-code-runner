@@ -1,12 +1,11 @@
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 
 import {
-  IExecuteFunctions,
   IHttpRequestOptions,
-  INodeExecutionData,
 } from 'n8n-workflow';
 
-import { BaseRuntime, CodeType } from '../base';
+import { BaseRuntime } from '../base';
 
 function getDenoDownloadLink(os: string, arch: string): string {
   return `https://github.com/oven-sh/bun/releases/latest/download/bun-${os}-${arch}.zip`;
@@ -16,12 +15,20 @@ function getDenoChecksumsLink(): string {
   return 'https://github.com/oven-sh/bun/releases/latest/download/SHASUMS256.txt';
 }
 
-export class DenoRuntime implements BaseRuntime {
-  async getRuntime(): Promise<path.ParsedPath|null> {
-    return null;
+export class DenoRuntime extends BaseRuntime {
+  getRuntimeDir(): string {
+    return path.join(this.getTempDir(), 'deno');
   }
 
-  async fetchRuntime(): Promise<path.ParsedPath> {
+  getExecutablePath(): string {
+    return path.join(this.getRuntimeDir(), 'deno');
+  }
+
+  getRuntimeShimSourceDir(): string {
+    return path.join(__dirname, 'shim');
+  }
+
+  async fetchRuntime(): Promise<string> {
     const os = process.platform;
     switch (process.arch) {
       case 'x64':
@@ -37,7 +44,7 @@ export class DenoRuntime implements BaseRuntime {
         throw new Error(`Unsupported architecture: ${process.arch}`);
     }
 
-    return path.parse("/dev/null");
+    return "/dev/null";
   }
 
   async fetchDeno(os: string, arch: string) {
@@ -61,7 +68,15 @@ export class DenoRuntime implements BaseRuntime {
     // const checksumsResponse = await this.fetch(checksumsOptions);
   }
 
-  async execute(that: IExecuteFunctions, codeType: CodeType, code: string, inputs: INodeExecutionData[]): Promise<INodeExecutionData[][]> {
+  async getRuntime(): Promise<string|null> {
+    return null;
+  }
+
+  getRuntimeArguments(codePath: string): string[] {
     return [];
+  }
+
+  getSpawnOptions(codePath: string, logStream: fs.WriteStream): any {
+    return {};
   }
 }
